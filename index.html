@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panduan Menyambungkan PC - Animasi Interaktif</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            color: #fff;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease-out;
+        }
+        
+        h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+        
+        .steps-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            justify-content: center;
+        }
+        
+        .steps-sidebar {
+            flex: 1;
+            min-width: 300px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .step {
+            padding: 15px;
+            margin-bottom: 15px;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        
+        .step:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+        }
+        
+        .step.active {
+            background: rgba(255, 255, 255, 0.25);
+            border-left: 5px solid #fdbb2d;
+        }
+        
+        .step-number {
+            display: inline-block;
+            width: 30px;
+            height: 30px;
+            background: #fdbb2d;
+            color: #1a2a6c;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 30px;
+            margin-right: 10px;
+            font-weight: bold;
+        }
+        
+        .animation-area {
+            flex: 2;
+            min-width: 300px;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 500px;
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .pc-setup {
+            width: 100%;
+            height: 100%;
+            position: relative;
+        }
+        
+        .pc-case {
+            width: 150px;
+            height: 300px;
+            background: linear-gradient(135deg, #2c3e50, #1a1a1a);
+            border-radius: 10px;
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(-50%);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .pc-front-ports {
+            width: 60px;
+            height: 30px;
+            background: #333;
+            position: absolute;
+            bottom: 170px;
+            left: 70px;
+            border-radius: 5px;
+        }
+        
+        .pc-power {
+            width: 15px;
+            height: 15px;
+            background: #ff4757;
+            border-radius: 50%;
+            position: absolute;
+            bottom: 180px;
+            left: 40px;
+        }
+        
+        .pc-back-ports {
+            width: 120px;
+            height: 180px;
+            background: #2f3542;
+            position: absolute;
+            bottom: 100px;
+            left: 50%;
+            transform: translateX(40px);
+            border-top-right-radius: 5px;
+            border-bottom-right-radius: 5px;
+        }
+        
+        .port {
+            width: 20px;
+            height: 10px;
+            background: #1e90ff;
+            margin: 5px;
+            display: inline-block;
+            border-radius: 2px;
+        }
+        
+        .port.usb {
+            background: #1e90ff;
+        }
+        
+        .port.vga {
+            background: #ffa502;
+            height: 20px;
+            width: 30px;
+        }
+        
+        .port.power {
+            background: #ff4757;
+            height: 15px;
+            width: 25px;
+        }
+        
+        .monitor {
+            width: 250px;
+            height: 180px;
+            background: linear-gradient(135deg, #2c3e50, #1a1a1a);
+            border-radius: 10px 10px 0 0;
+            position: absolute;
+            top: 50px;
+            right: 50px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+            transform: perspective(500px) rotateY(-10deg);
+        }
+        
+        .monitor-screen {
+            width: 220px;
+            height: 140px;
+            background: #0c0c0c;
+            margin: 20px auto;
+            border-radius: 5px;
+            overflow: hidden;
+            position: relative;
+        }
+        
+        .screen-content {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, #1a2a6c, #b21f1f, #fdbb2d);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            text-align: center;
+            padding: 10px;
+        }
+        
+        .monitor-stand {
+            width: 40px;
+            height: 30px;
+            background: #2f3542;
+            position: absolute;
+            bottom: -30px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        
+        .monitor-base {
+            width: 100px;
+            height: 10px;
+            background: #2f3542;
+            position: absolute;
+            bottom: -40px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 0 0 5px 5px;
+        }
+        
+        .keyboard {
+            width: 200px;
+            height: 80px;
+            background: #2f3542;
+            position: absolute;
+            bottom: 30px;
+            left: 100px;
+            border-radius: 8px;
+            transform: perspective(500px) rotateY(10deg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .mouse {
+            width: 60px;
+            height: 100px;
+            background: #2f3542;
+            position: absolute;
+            bottom: 40px;
+            left: 30px;
+            border-radius: 30px 30px 15px 15px;
+            transform: perspective(500px) rotateY(10deg);
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
+        }
+        
+        .cable {
+            position: absolute;
+            background: #636e72;
+            z-index: -1;
+        }
+        
+        .cable-usb-keyboard {
+            width: 3px;
+            height: 100px;
+            bottom: 110px;
+            left: 180px;
+            transform: rotate(10deg);
+        }
+        
+        .cable-usb-mouse {
+            width: 3px;
+            height: 100px;
+            bottom: 110px;
+            left: 60px;
+            transform: rotate(5deg);
+        }
+        
+        .cable-power {
+            width: 5px;
+            height: 120px;
+            bottom: 100px;
+            left: 290px;
+            transform: rotate(-15deg);
+        }
+        
+        .cable-vga {
+            width: 5px;
+            height: 150px;
+            bottom: 180px;
+            left: 240px;
+            transform: rotate(45deg);
+        }
+        
+        .instructions {
+            margin-top: 20px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+        }
+        
+        .instructions h2 {
+            margin-bottom: 15px;
+            color: #fdbb2d;
+        }
+        
+        .instructions p {
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .highlight {
+            background: rgba(253, 187, 45, 0.2);
+            padding: 2px 5px;
+            border-radius: 3px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            margin-top: 30px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            border: none;
+            border-radius: 50px;
+            background: linear-gradient(135deg, #fdbb2d, #b21f1f);
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+        }
+        
+        button:active {
+            transform: translateY(1px);
+        }
+        
+        .progress-bar {
+            height: 5px;
+            background: rgba(255, 255, 255, 0.2);
+            width: 100%;
+            border-radius: 5px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+        
+        .progress {
+            height: 100%;
+            background: #fdbb2d;
+            width: 0%;
+            transition: width 0.5s ease;
+            border-radius: 5px;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        @keyframes highlight {
+            0% { background-color: rgba(253, 187, 45, 0.2); }
+            50% { background-color: rgba(253, 187, 45, 0.5); }
+            100% { background-color: rgba(253, 187, 45, 0.2); }
+        }
+        
+        .pulse {
+            animation: pulse 2s infinite;
+        }
+        
+        .highlight-animation {
+            animation: highlight 2s infinite;
+        }
+        
+        @media (max-width: 768px) {
+            .steps-container {
+                flex-direction: column;
+            }
+            
+            .animation-area {
+                min-height: 400px;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Panduan Menyambungkan PC</h1>
+            <p class="subtitle">Ikuti langkah-langkah interaktif untuk menyambungkan PC dengan benar</p>
+        </header>
+        
+        <div class="progress-bar">
+            <div class="progress" id="progress"></div>
+        </div>
+        
+        <div class="steps-container">
+            <div class="steps-sidebar">
+                <div class="step active" data-step="1">
+                    <span class="step-number">1</span>
+                    <span>Pasang Keyboard & Mouse ke PC</span>
+                </div>
+                <div class="step" data-step="2">
+                    <span class="step-number">2</span>
+                    <span>Sambungkan Kabel Power</span>
+                </div>
+                <div class="step" data-step="3">
+                    <span class="step-number">3</span>
+                    <span>Sambungkan Kabel VGA ke Monitor</span>
+                </div>
+            </div>
+            
+            <div class="animation-area">
+                <div class="pc-setup">
+                    <div class="pc-case">
+                        <div class="pc-power"></div>
+                        <div class="pc-front-ports"></div>
+                        <div class="pc-back-ports">
+                            <div class="port usb"></div>
+                            <div class="port usb"></div>
+                            <div class="port vga"></div>
+                            <div class="port power"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="monitor">
+                        <div class="monitor-screen">
+                            <div class="screen-content">PC Connection Guide</div>
+                        </div>
+                        <div class="monitor-stand"></div>
+                        <div class="monitor-base"></div>
+                    </div>
+                    
+                    <div class="keyboard"></div>
+                    <div class="mouse"></div>
+                    
+                    <div class="cable cable-usb-keyboard"></div>
+                    <div class="cable cable-usb-mouse"></div>
+                    <div class="cable cable-power"></div>
+                    <div class="cable cable-vga"></div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="instructions">
+            <h2>Langkah 1: Pasang Keyboard & Mouse ke PC</h2>
+            <p>Cari port <span class="highlight">USB-A</span> di casing PC. Biasanya berbentuk persegi panjang dengan ukuran sekitar 1,5 cm.</p>
+            <p>Letaknya bisa di bagian belakang casing (dekat port lain seperti HDMI/VGA/LAN), atau di depan/atas casing (jika casing punya port front panel).</p>
+            <p>Ambil kabel keyboard dan mouse. Ujung kabel biasanya sudah menggunakan USB-A.</p>
+            <p>Masukkan kabel keyboard ke salah satu port USB. Masukkan kabel mouse ke port USB lain.</p>
+            <p>Pastikan keduanya masuk dengan posisi yang benar (jangan dipaksa terbalik).</p>
+        </div>
+        
+        <div class="nav-buttons">
+            <button id="prev-btn">Sebelumnya</button>
+            <button id="next-btn">Lanjut</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const steps = document.querySelectorAll('.step');
+            const instructions = document.querySelector('.instructions');
+            const progress = document.getElementById('progress');
+            const prevBtn = document.getElementById('prev-btn');
+            const nextBtn = document.getElementById('next-btn');
+            const pcCase = document.querySelector('.pc-case');
+            const keyboard = document.querySelector('.keyboard');
+            const mouse = document.querySelector('.mouse');
+            const monitor = document.querySelector('.monitor');
+            const cables = document.querySelectorAll('.cable');
+            
+            let currentStep = 1;
+            const totalSteps = steps.length;
+            
+            // Update progress bar
+            function updateProgress() {
+                progress.style.width = `${(currentStep / totalSteps) * 100}%`;
+            }
+            
+            // Update content based on current step
+            function updateContent() {
+                // Remove active class from all steps
+                steps.forEach(step => step.classList.remove('active'));
+                
+                // Add active class to current step
+                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
+                
+                // Reset all animations
+                pcCase.classList.remove('pulse');
+                keyboard.classList.remove('pulse');
+                mouse.classList.remove('pulse');
+                monitor.classList.remove('pulse');
+                cables.forEach(cable => cable.classList.remove('highlight-animation'));
+                
+                // Update instructions and animations based on current step
+                switch(currentStep) {
+                    case 1:
+                        instructions.innerHTML = `
+                            <h2>Langkah 1: Pasang Keyboard & Mouse ke PC</h2>
+                            <p>Cari port <span class="highlight">USB-A</span> di casing PC. Biasanya berbentuk persegi panjang dengan ukuran sekitar 1,5 cm.</p>
+                            <p>Letaknya bisa di bagian belakang casing (dekat port lain seperti HDMI/VGA/LAN), atau di depan/atas casing (jika casing punya port front panel).</p>
+                            <p>Ambil kabel keyboard dan mouse. Ujung kabel biasanya sudah menggunakan USB-A.</p>
+                            <p>Masukkan kabel keyboard ke salah satu port USB. Masukkan kabel mouse ke port USB lain.</p>
+                            <p>Pastikan keduanya masuk dengan posisi yang benar (jangan dipaksa terbalik).</p>
+                        `;
+                        keyboard.classList.add('pulse');
+                        mouse.classList.add('pulse');
+                        document.querySelector('.cable-usb-keyboard').classList.add('highlight-animation');
+                        document.querySelector('.cable-usb-mouse').classList.add('highlight-animation');
+                        break;
+                    case 2:
+                        instructions.innerHTML = `
+                            <h2>Langkah 2: Sambungkan Kabel Power</h2>
+                            <p>Cari kabel power (biasanya kabel dengan 3 lubang di ujungnya, model kabel C13/C14 standar komputer).</p>
+                            <p>Colokkan ujung kabel power yang berbentuk kotak kecil ke port power supply di bagian belakang casing PC.</p>
+                            <p>Port ini biasanya terletak di bawah atau atas casing, tergantung modelnya.</p>
+                            <p>Colokkan ujung kabel satunya lagi (colokan listrik) ke stop kontak atau terminal listrik.</p>
+                            <p>Pastikan tombol switch power supply (jika ada, biasanya berbentuk kecil warna hitam/merah di belakang PSU) dalam posisi ON (—), bukan OFF (O).</p>
+                        `;
+                        pcCase.classList.add('pulse');
+                        document.querySelector('.cable-power').classList.add('highlight-animation');
+                        break;
+                    case 3:
+                        instructions.innerHTML = `
+                            <h2>Langkah 3: Sambungkan Kabel VGA ke Monitor</h2>
+                            <p>Cari port VGA di motherboard PC. Bentuknya seperti trapezium dengan 15 pin kecil (biasanya warna biru).</p>
+                            <p>Terletak di bagian belakang PC, berjejer dengan port lain.</p>
+                            <p>Ambil kabel VGA. Ujung kabel VGA biasanya berwarna biru dengan dua sekrup kecil di kanan dan kiri.</p>
+                            <p>Colokkan salah satu ujung kabel VGA ke port VGA di motherboard PC. Setelah masuk, putar sekrup kecil di kiri dan kanan agar konektor VGA tidak longgar.</p>
+                            <p>Colokkan ujung kabel VGA satunya lagi ke port VGA di monitor. Pastikan juga dikencangkan dengan sekrupnya.</p>
+                            <p>Jika monitor butuh listrik terpisah, sambungkan kabel power monitor ke stop kontak. Nyalakan monitor dengan menekan tombol power di bawah/samping monitor.</p>
+                        `;
+                        monitor.classList.add('pulse');
+                        document.querySelector('.cable-vga').classList.add('highlight-animation');
+                        break;
+                }
+                
+                // Update button states
+                prevBtn.disabled = currentStep === 1;
+                nextBtn.disabled = currentStep === totalSteps;
+                
+                updateProgress();
+            }
+            
+            // Next button click event
+            nextBtn.addEventListener('click', function() {
+                if (currentStep < totalSteps) {
+                    currentStep++;
+                    updateContent();
+                }
+            });
+            
+            // Previous button click event
+            prevBtn.addEventListener('click', function() {
+                if (currentStep > 1) {
+                    currentStep--;
+                    updateContent();
+                }
+            });
+            
+            // Step click event
+            steps.forEach(step => {
+                step.addEventListener('click', function() {
+                    currentStep = parseInt(this.getAttribute('data-step'));
+                    updateContent();
+                });
+            });
+            
+            // Initialize content
+            updateContent();
+        });
+    </script>
+</body>
+</html>
