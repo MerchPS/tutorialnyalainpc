@@ -3,605 +3,1723 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Panduan Menyambungkan PC - Animasi Interaktif</title>
+    <title>Panduan Merakit PC 3D - Tutorial Interaktif Ultra Keren</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/tween.js/18.6.4/tween.umd.js"></script>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto:wght@300;400;500;700&display=swap');
+
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
-        
+
         body {
-            background: linear-gradient(135deg, #1a2a6c, #b21f1f, #fdbb2d);
+            font-family: 'Roboto', sans-serif;
+            background: radial-gradient(circle at center, #0a0a23, #000);
             color: #fff;
-            min-height: 100vh;
-            padding: 20px;
+            overflow-x: hidden;
+            cursor: none;
         }
-        
+
+        .custom-cursor {
+            position: fixed;
+            width: 20px;
+            height: 20px;
+            border: 2px solid #00ffff;
+            border-radius: 50%;
+            pointer-events: none;
+            z-index: 10000;
+            transition: transform 0.1s ease;
+            box-shadow: 0 0 20px #00ffff;
+        }
+
+        .custom-cursor.active {
+            transform: scale(1.5);
+            border-color: #ff6b6b;
+            box-shadow: 0 0 30px #ff6b6b;
+        }
+
         .container {
-            max-width: 1200px;
-            margin: 0 auto;
-            padding: 20px;
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
         }
-        
-        header {
+
+        .header {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 1000;
+            background: linear-gradient(135deg, rgba(0,0,0,0.8), rgba(20,20,50,0.6));
+            backdrop-filter: blur(15px);
+            border-bottom: 2px solid rgba(0,255,255,0.3);
+            padding: 20px;
             text-align: center;
-            margin-bottom: 40px;
-            animation: fadeIn 1s ease-out;
         }
-        
-        h1 {
+
+        .header h1 {
+            font-family: 'Orbitron', monospace;
             font-size: 2.5rem;
-            margin-bottom: 10px;
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+            font-weight: 900;
+            background: linear-gradient(45deg, #00ffff, #ff6b6b, #ffd93d);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            text-shadow: 0 0 30px rgba(0,255,255,0.5);
+            animation: titleGlow 3s ease-in-out infinite;
         }
-        
+
+        @keyframes titleGlow {
+            0%, 100% { filter: brightness(1); }
+            50% { filter: brightness(1.3); }
+        }
+
         .subtitle {
-            font-size: 1.2rem;
-            opacity: 0.9;
+            font-size: 1.1rem;
+            color: rgba(255,255,255,0.8);
+            margin-top: 10px;
+            letter-spacing: 2px;
         }
-        
-        .steps-container {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            justify-content: center;
+
+        .scene-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            background: radial-gradient(ellipse at center, rgba(0,100,200,0.1), rgba(0,0,0,0.9));
         }
-        
-        .steps-sidebar {
-            flex: 1;
-            min-width: 300px;
-            background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(10px);
+
+        .ui-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 500;
+        }
+
+        .step-panel {
+            position: absolute;
+            left: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 350px;
+            background: rgba(0,20,40,0.9);
+            border: 1px solid rgba(0,255,255,0.3);
             border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(0,255,255,0.2);
+            pointer-events: all;
         }
-        
-        .step {
+
+        .step-item {
+            display: flex;
+            align-items: center;
             padding: 15px;
-            margin-bottom: 15px;
+            margin: 10px 0;
             border-radius: 10px;
+            background: rgba(255,255,255,0.05);
+            border: 1px solid transparent;
             cursor: pointer;
             transition: all 0.3s ease;
-            background: rgba(255, 255, 255, 0.1);
+            position: relative;
+            overflow: hidden;
         }
-        
-        .step:hover {
-            background: rgba(255, 255, 255, 0.2);
-            transform: translateX(5px);
+
+        .step-item::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(0,255,255,0.2), transparent);
+            transition: left 0.5s ease;
         }
-        
-        .step.active {
-            background: rgba(255, 255, 255, 0.25);
-            border-left: 5px solid #fdbb2d;
+
+        .step-item:hover::before {
+            left: 100%;
         }
-        
+
+        .step-item.active {
+            border-color: #00ffff;
+            background: rgba(0,255,255,0.1);
+            box-shadow: 0 0 20px rgba(0,255,255,0.3);
+        }
+
+        .step-item.completed {
+            border-color: #4ade80;
+            background: rgba(74,222,128,0.1);
+        }
+
         .step-number {
-            display: inline-block;
-            width: 30px;
-            height: 30px;
-            background: #fdbb2d;
-            color: #1a2a6c;
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            text-align: center;
-            line-height: 30px;
-            margin-right: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
             font-weight: bold;
+            font-size: 1.2rem;
+            margin-right: 15px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
-        
-        .animation-area {
-            flex: 2;
-            min-width: 300px;
-            background: rgba(0, 0, 0, 0.4);
-            backdrop-filter: blur(10px);
+
+        .step-item.active .step-number {
+            background: linear-gradient(135deg, #00ffff, #0099cc);
+            animation: pulse 2s infinite;
+        }
+
+        .step-item.completed .step-number {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+        }
+
+        .step-item.completed .step-number::after {
+            content: '✓';
+        }
+
+        @keyframes pulse {
+            0% { box-shadow: 0 5px 15px rgba(0,255,255,0.3); }
+            50% { box-shadow: 0 5px 25px rgba(0,255,255,0.6), 0 0 30px rgba(0,255,255,0.4); }
+            100% { box-shadow: 0 5px 15px rgba(0,255,255,0.3); }
+        }
+
+        .step-title {
+            font-weight: 500;
+            font-size: 1rem;
+            color: #fff;
+            line-height: 1.4;
+        }
+
+        .controls-panel {
+            position: absolute;
+            right: 30px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            background: rgba(20,20,50,0.9);
+            border: 1px solid rgba(255,107,107,0.3);
             border-radius: 15px;
-            padding: 20px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            box-shadow: 0 20px 60px rgba(255,107,107,0.2);
+            pointer-events: all;
+        }
+
+        .control-button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .control-button::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .control-button:hover::before {
+            left: 100%;
+        }
+
+        .control-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
+        }
+
+        .control-button.primary {
+            background: linear-gradient(135deg, #00ffff, #0099cc);
+        }
+
+        .control-button.success {
+            background: linear-gradient(135deg, #4ade80, #22c55e);
+        }
+
+        .control-button.warning {
+            background: linear-gradient(135deg, #fbbf24, #f59e0b);
+        }
+
+        .control-button:disabled {
+            background: rgba(100,100,100,0.3);
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .progress-container {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 60%;
+            background: rgba(0,0,0,0.5);
+            border-radius: 25px;
+            padding: 10px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.1);
+            pointer-events: all;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: rgba(255,255,255,0.1);
+            border-radius: 4px;
+            overflow: hidden;
+            margin-bottom: 10px;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #00ffff, #ff6b6b, #ffd93d);
+            width: 0%;
+            transition: width 0.8s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+            border-radius: 4px;
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: progressShine 2s linear infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-text {
+            text-align: center;
+            font-size: 0.9rem;
+            color: rgba(255,255,255,0.8);
+            font-weight: 500;
+        }
+
+        .instruction-panel {
+            position: absolute;
+            bottom: 120px;
+            left: 30px;
+            right: 30px;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid rgba(0,255,255,0.3);
+            border-radius: 15px;
+            padding: 25px;
+            backdrop-filter: blur(20px);
+            max-height: 200px;
+            overflow-y: auto;
+            pointer-events: all;
+        }
+
+        .instruction-panel h3 {
+            font-family: 'Orbitron', monospace;
+            color: #00ffff;
+            margin-bottom: 15px;
+            font-size: 1.3rem;
+        }
+
+        .instruction-panel p {
+            line-height: 1.6;
+            color: rgba(255,255,255,0.9);
+            margin-bottom: 10px;
+        }
+
+        .highlight {
+            background: linear-gradient(45deg, rgba(0,255,255,0.2), rgba(255,107,107,0.2));
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-weight: 500;
+        }
+
+        .floating-ui {
+            position: absolute;
+            background: rgba(0,0,0,0.8);
+            border: 1px solid rgba(0,255,255,0.5);
+            border-radius: 10px;
+            padding: 15px;
+            backdrop-filter: blur(10px);
+            pointer-events: none;
+            opacity: 0;
+            transition: all 0.3s ease;
+            z-index: 1000;
+        }
+
+        .floating-ui.show {
+            opacity: 1;
+            transform: translateY(-10px);
+        }
+
+        .particle-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 100;
+        }
+
+        .particle {
+            position: absolute;
+            width: 4px;
+            height: 4px;
+            background: #00ffff;
+            border-radius: 50%;
+            animation: float 6s linear infinite;
+            opacity: 0.6;
+            box-shadow: 0 0 10px #00ffff;
+        }
+
+        @keyframes float {
+            0% {
+                transform: translateY(100vh) translateX(0px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100px) translateX(100px) rotate(360deg);
+                opacity: 0;
+            }
+        }
+
+        .loading-screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle, rgba(0,0,35,0.95), rgba(0,0,0,1));
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            min-height: 500px;
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-            overflow: hidden;
-            position: relative;
+            z-index: 10000;
+            transition: opacity 1s ease;
         }
-        
-        .pc-setup {
-            width: 100%;
-            height: 100%;
-            position: relative;
+
+        .loading-screen.hidden {
+            opacity: 0;
+            pointer-events: none;
         }
-        
-        .pc-case {
-            width: 150px;
-            height: 300px;
-            background: linear-gradient(135deg, #2c3e50, #1a1a1a);
-            border-radius: 10px;
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(-50%);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-        }
-        
-        .pc-front-ports {
-            width: 60px;
-            height: 30px;
-            background: #333;
-            position: absolute;
-            bottom: 170px;
-            left: 70px;
-            border-radius: 5px;
-        }
-        
-        .pc-power {
-            width: 15px;
-            height: 15px;
-            background: #ff4757;
-            border-radius: 50%;
-            position: absolute;
-            bottom: 180px;
-            left: 40px;
-        }
-        
-        .pc-back-ports {
-            width: 120px;
-            height: 180px;
-            background: #2f3542;
-            position: absolute;
-            bottom: 100px;
-            left: 50%;
-            transform: translateX(40px);
-            border-top-right-radius: 5px;
-            border-bottom-right-radius: 5px;
-        }
-        
-        .port {
-            width: 20px;
-            height: 10px;
-            background: #1e90ff;
-            margin: 5px;
-            display: inline-block;
-            border-radius: 2px;
-        }
-        
-        .port.usb {
-            background: #1e90ff;
-        }
-        
-        .port.vga {
-            background: #ffa502;
-            height: 20px;
-            width: 30px;
-        }
-        
-        .port.power {
-            background: #ff4757;
-            height: 15px;
-            width: 25px;
-        }
-        
-        .monitor {
-            width: 250px;
-            height: 180px;
-            background: linear-gradient(135deg, #2c3e50, #1a1a1a);
-            border-radius: 10px 10px 0 0;
-            position: absolute;
-            top: 50px;
-            right: 50px;
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-            transform: perspective(500px) rotateY(-10deg);
-        }
-        
-        .monitor-screen {
-            width: 220px;
-            height: 140px;
-            background: #0c0c0c;
-            margin: 20px auto;
-            border-radius: 5px;
-            overflow: hidden;
-            position: relative;
-        }
-        
-        .screen-content {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(45deg, #1a2a6c, #b21f1f, #fdbb2d);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 1.5rem;
-            color: white;
-            text-align: center;
-            padding: 10px;
-        }
-        
-        .monitor-stand {
-            width: 40px;
-            height: 30px;
-            background: #2f3542;
-            position: absolute;
-            bottom: -30px;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        
-        .monitor-base {
-            width: 100px;
-            height: 10px;
-            background: #2f3542;
-            position: absolute;
-            bottom: -40px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 0 0 5px 5px;
-        }
-        
-        .keyboard {
-            width: 200px;
+
+        .loader {
+            width: 80px;
             height: 80px;
-            background: #2f3542;
+            border: 4px solid rgba(0,255,255,0.3);
+            border-top: 4px solid #00ffff;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 30px;
+            box-shadow: 0 0 30px rgba(0,255,255,0.5);
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-family: 'Orbitron', monospace;
+            font-size: 1.2rem;
+            color: #00ffff;
+            text-align: center;
+            animation: pulse 2s ease-in-out infinite;
+        }
+
+        .audio-controls {
             position: absolute;
-            bottom: 30px;
-            left: 100px;
-            border-radius: 8px;
-            transform: perspective(500px) rotateY(10deg);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-        }
-        
-        .mouse {
-            width: 60px;
-            height: 100px;
-            background: #2f3542;
-            position: absolute;
-            bottom: 40px;
-            left: 30px;
-            border-radius: 30px 30px 15px 15px;
-            transform: perspective(500px) rotateY(10deg);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.5);
-        }
-        
-        .cable {
-            position: absolute;
-            background: #636e72;
-            z-index: -1;
-        }
-        
-        .cable-usb-keyboard {
-            width: 3px;
-            height: 100px;
-            bottom: 110px;
-            left: 180px;
-            transform: rotate(10deg);
-        }
-        
-        .cable-usb-mouse {
-            width: 3px;
-            height: 100px;
-            bottom: 110px;
-            left: 60px;
-            transform: rotate(5deg);
-        }
-        
-        .cable-power {
-            width: 5px;
-            height: 120px;
-            bottom: 100px;
-            left: 290px;
-            transform: rotate(-15deg);
-        }
-        
-        .cable-vga {
-            width: 5px;
-            height: 150px;
-            bottom: 180px;
-            left: 240px;
-            transform: rotate(45deg);
-        }
-        
-        .instructions {
-            margin-top: 20px;
-            padding: 20px;
-            background: rgba(255, 255, 255, 0.1);
-            border-radius: 10px;
-            max-width: 800px;
-            margin-left: auto;
-            margin-right: auto;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
-        }
-        
-        .instructions h2 {
-            margin-bottom: 15px;
-            color: #fdbb2d;
-        }
-        
-        .instructions p {
-            line-height: 1.6;
-            margin-bottom: 10px;
-        }
-        
-        .highlight {
-            background: rgba(253, 187, 45, 0.2);
-            padding: 2px 5px;
-            border-radius: 3px;
-        }
-        
-        .nav-buttons {
+            top: 120px;
+            right: 30px;
             display: flex;
-            justify-content: center;
-            gap: 20px;
-            margin-top: 30px;
+            gap: 10px;
+            z-index: 1001;
         }
-        
-        button {
-            padding: 12px 25px;
+
+        .audio-btn {
+            width: 50px;
+            height: 50px;
             border: none;
-            border-radius: 50px;
-            background: linear-gradient(135deg, #fdbb2d, #b21f1f);
-            color: white;
-            font-weight: bold;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.7);
+            color: #00ffff;
+            font-size: 1.2rem;
             cursor: pointer;
             transition: all 0.3s ease;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0,255,255,0.3);
         }
-        
-        button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+
+        .audio-btn:hover {
+            background: rgba(0,255,255,0.2);
+            box-shadow: 0 5px 15px rgba(0,255,255,0.3);
         }
-        
-        button:active {
-            transform: translateY(1px);
+
+        .version-info {
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            font-size: 0.8rem;
+            color: rgba(255,255,255,0.5);
+            font-family: 'Orbitron', monospace;
         }
-        
-        .progress-bar {
-            height: 5px;
-            background: rgba(255, 255, 255, 0.2);
+
+        .connection-line {
+            position: absolute;
+            height: 2px;
+            background: linear-gradient(90deg, #00ffff, #ff6b6b);
+            opacity: 0;
+            transition: all 1s ease;
+            pointer-events: none;
+            z-index: 200;
+            box-shadow: 0 0 10px rgba(0,255,255,0.8);
+        }
+
+        .connection-line.active {
+            opacity: 1;
+            animation: connectionFlow 2s ease-in-out;
+        }
+
+        @keyframes connectionFlow {
+            0% { transform: scaleX(0); }
+            100% { transform: scaleX(1); }
+        }
+
+        .success-popup {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: rgba(0,0,0,0.9);
+            border: 2px solid #4ade80;
+            border-radius: 20px;
+            padding: 40px;
+            text-align: center;
+            z-index: 5000;
+            backdrop-filter: blur(20px);
+            transition: all 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        .success-popup.show {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .success-popup h2 {
+            color: #4ade80;
+            font-family: 'Orbitron', monospace;
+            font-size: 2rem;
+            margin-bottom: 20px;
+        }
+
+        .success-popup .icon {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            animation: bounce 1s ease-in-out;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-20px); }
+            60% { transform: translateY(-10px); }
+        }
+
+        .hologram-effect {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
-            border-radius: 5px;
-            margin-top: 20px;
-            overflow: hidden;
-        }
-        
-        .progress {
             height: 100%;
-            background: #fdbb2d;
-            width: 0%;
-            transition: width 0.5s ease;
-            border-radius: 5px;
+            background: repeating-linear-gradient(
+                0deg,
+                transparent,
+                transparent 2px,
+                rgba(0,255,255,0.03) 2px,
+                rgba(0,255,255,0.03) 4px
+            );
+            pointer-events: none;
+            z-index: 10;
         }
-        
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(-20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-        
-        @keyframes pulse {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.05); }
-            100% { transform: scale(1); }
-        }
-        
-        @keyframes highlight {
-            0% { background-color: rgba(253, 187, 45, 0.2); }
-            50% { background-color: rgba(253, 187, 45, 0.5); }
-            100% { background-color: rgba(253, 187, 45, 0.2); }
-        }
-        
-        .pulse {
-            animation: pulse 2s infinite;
-        }
-        
-        .highlight-animation {
-            animation: highlight 2s infinite;
-        }
-        
+
         @media (max-width: 768px) {
-            .steps-container {
-                flex-direction: column;
-            }
-            
-            .animation-area {
-                min-height: 400px;
-            }
-            
-            h1 {
-                font-size: 2rem;
-            }
+            .header h1 { font-size: 1.8rem; }
+            .step-panel, .controls-panel { width: 280px; }
+            .step-panel { left: 10px; }
+            .controls-panel { right: 10px; }
+            .progress-container { width: 80%; }
+            .instruction-panel { left: 10px; right: 10px; }
+        }
+
+        .fps-counter {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            background: rgba(0,0,0,0.7);
+            color: #00ffff;
+            padding: 5px 10px;
+            border-radius: 5px;
+            font-family: 'Orbitron', monospace;
+            font-size: 0.8rem;
+            z-index: 1001;
         }
     </style>
 </head>
 <body>
+    <div class="custom-cursor"></div>
+
+    <div class="loading-screen" id="loadingScreen">
+        <div class="loader"></div>
+        <div class="loading-text">Memuat Pengalaman 3D Ultra Keren...</div>
+        <div style="margin-top: 20px; font-size: 0.9rem; opacity: 0.7;">
+            Mohon tunggu sebentar...
+        </div>
+    </div>
+
     <div class="container">
-        <header>
-            <h1>Panduan Menyambungkan PC</h1>
-            <p class="subtitle">Ikuti langkah-langkah interaktif untuk menyambungkan PC dengan benar</p>
-        </header>
-        
-        <div class="progress-bar">
-            <div class="progress" id="progress"></div>
+        <div class="header">
+            <h1>🚀 PC Assembly 3D Ultra</h1>
+            <p class="subtitle">Pengalaman Merakit PC Paling Keren di Dunia</p>
         </div>
-        
-        <div class="steps-container">
-            <div class="steps-sidebar">
-                <div class="step active" data-step="1">
-                    <span class="step-number">1</span>
-                    <span>Pasang Keyboard & Mouse ke PC</span>
+
+        <div class="fps-counter" id="fpsCounter">FPS: 60</div>
+
+        <div class="audio-controls">
+            <button class="audio-btn" id="musicBtn" title="Toggle Music">🎵</button>
+            <button class="audio-btn" id="sfxBtn" title="Toggle SFX">🔊</button>
+        </div>
+
+        <div class="scene-container" id="sceneContainer">
+            <div class="hologram-effect"></div>
+        </div>
+
+        <div class="particle-container" id="particleContainer"></div>
+
+        <div class="ui-overlay">
+            <div class="step-panel">
+                <h3 style="color: #00ffff; margin-bottom: 20px; font-family: 'Orbitron', monospace;">Langkah Assembly</h3>
+
+                <div class="step-item active" data-step="1">
+                    <div class="step-number">1</div>
+                    <div class="step-title">Siapkan Workspace & Komponen</div>
                 </div>
-                <div class="step" data-step="2">
-                    <span class="step-number">2</span>
-                    <span>Sambungkan Kabel Power</span>
+
+                <div class="step-item" data-step="2">
+                    <div class="step-number">2</div>
+                    <div class="step-title">Pasang Keyboard & Mouse</div>
                 </div>
-                <div class="step" data-step="3">
-                    <span class="step-number">3</span>
-                    <span>Sambungkan Kabel VGA ke Monitor</span>
+
+                <div class="step-item" data-step="3">
+                    <div class="step-number">3</div>
+                    <div class="step-title">Hubungkan Kabel Power</div>
+                </div>
+
+                <div class="step-item" data-step="4">
+                    <div class="step-number">4</div>
+                    <div class="step-title">Sambungkan Monitor VGA</div>
+                </div>
+
+                <div class="step-item" data-step="5">
+                    <div class="step-number">5</div>
+                    <div class="step-title">Test & Finalisasi</div>
                 </div>
             </div>
-            
-            <div class="animation-area">
-                <div class="pc-setup">
-                    <div class="pc-case">
-                        <div class="pc-power"></div>
-                        <div class="pc-front-ports"></div>
-                        <div class="pc-back-ports">
-                            <div class="port usb"></div>
-                            <div class="port usb"></div>
-                            <div class="port vga"></div>
-                            <div class="port power"></div>
-                        </div>
-                    </div>
-                    
-                    <div class="monitor">
-                        <div class="monitor-screen">
-                            <div class="screen-content">PC Connection Guide</div>
-                        </div>
-                        <div class="monitor-stand"></div>
-                        <div class="monitor-base"></div>
-                    </div>
-                    
-                    <div class="keyboard"></div>
-                    <div class="mouse"></div>
-                    
-                    <div class="cable cable-usb-keyboard"></div>
-                    <div class="cable cable-usb-mouse"></div>
-                    <div class="cable cable-power"></div>
-                    <div class="cable cable-vga"></div>
-                </div>
+
+            <div class="controls-panel">
+                <h3 style="color: #ff6b6b; margin-bottom: 20px; font-family: 'Orbitron', monospace;">Kontrol 3D</h3>
+
+                <button class="control-button primary" id="resetCamera">🎥 Reset Kamera</button>
+                <button class="control-button" id="autoRotate">🔄 Auto Rotate</button>
+                <button class="control-button" id="toggleWireframe">📐 Wireframe Mode</button>
+                <button class="control-button success" id="completeStep">✅ Selesaikan Langkah</button>
+                <button class="control-button warning" id="skipStep">⏭️ Skip Langkah</button>
+                <button class="control-button" id="restartTutorial">🔄 Restart Tutorial</button>
             </div>
         </div>
-        
-        <div class="instructions">
-            <h2>Langkah 1: Pasang Keyboard & Mouse ke PC</h2>
-            <p>Cari port <span class="highlight">USB-A</span> di casing PC. Biasanya berbentuk persegi panjang dengan ukuran sekitar 1,5 cm.</p>
-            <p>Letaknya bisa di bagian belakang casing (dekat port lain seperti HDMI/VGA/LAN), atau di depan/atas casing (jika casing punya port front panel).</p>
-            <p>Ambil kabel keyboard dan mouse. Ujung kabel biasanya sudah menggunakan USB-A.</p>
-            <p>Masukkan kabel keyboard ke salah satu port USB. Masukkan kabel mouse ke port USB lain.</p>
-            <p>Pastikan keduanya masuk dengan posisi yang benar (jangan dipaksa terbalik).</p>
+
+        <div class="progress-container">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressFill"></div>
+            </div>
+            <div class="progress-text" id="progressText">Langkah 1 dari 5 - Persiapan</div>
         </div>
-        
-        <div class="nav-buttons">
-            <button id="prev-btn">Sebelumnya</button>
-            <button id="next-btn">Lanjut</button>
+
+        <div class="instruction-panel" id="instructionPanel">
+            <h3>Langkah 1: Persiapan Workspace</h3>
+            <p>Selamat datang di tutorial 3D ultra keren! 🚀</p>
+            <p>Klik dan drag untuk <span class="highlight">memutar kamera 3D</span></p>
+            <p>Scroll mouse untuk <span class="highlight">zoom in/out</span></p>
+            <p>Klik pada komponen untuk <span class="highlight">interaksi</span></p>
+        </div>
+
+        <div class="success-popup" id="successPopup">
+            <div class="icon">🎉</div>
+            <h2>Langkah Selesai!</h2>
+            <p>Excellent! Lanjut ke langkah berikutnya.</p>
+        </div>
+
+        <div class="floating-ui" id="floatingUI">
+            <div id="floatingContent">Hover pada komponen untuk info detail</div>
+        </div>
+
+        <div class="version-info">
+            PC Assembly 3D Ultra v2.0 | WebGL Powered
         </div>
     </div>
 
     <script>
+        // Global variables
+        let scene, camera, renderer, controls;
+        let pcCase, keyboard, mouse, monitor, cables = {};
+        let currentStep = 1;
+        let totalSteps = 5;
+        let isAutoRotating = false;
+        let isWireframe = false;
+        let mouse3D = new THREE.Vector2();
+        let raycaster = new THREE.Raycaster();
+        let hoveredObject = null;
+        let frameCount = 0;
+        let lastTime = performance.now();
+
+        // Audio context
+        let audioContext = null;
+        let musicEnabled = true;
+        let sfxEnabled = true;
+
+        // Component states
+        let componentStates = {
+            keyboard: { connected: false, position: new THREE.Vector3(-3, 0, 2) },
+            mouse: { connected: false, position: new THREE.Vector3(-2, 0, 3) },
+            power: { connected: false },
+            vga: { connected: false }
+        };
+
+        // Initialize everything when page loads
         document.addEventListener('DOMContentLoaded', function() {
-            const steps = document.querySelectorAll('.step');
-            const instructions = document.querySelector('.instructions');
-            const progress = document.getElementById('progress');
-            const prevBtn = document.getElementById('prev-btn');
-            const nextBtn = document.getElementById('next-btn');
-            const pcCase = document.querySelector('.pc-case');
-            const keyboard = document.querySelector('.keyboard');
-            const mouse = document.querySelector('.mouse');
-            const monitor = document.querySelector('.monitor');
-            const cables = document.querySelectorAll('.cable');
-            
-            let currentStep = 1;
-            const totalSteps = steps.length;
-            
-            // Update progress bar
-            function updateProgress() {
-                progress.style.width = `${(currentStep / totalSteps) * 100}%`;
+            setTimeout(() => {
+                initAudio();
+                initScene();
+                initParticles();
+                initEventListeners();
+                initCustomCursor();
+                animate();
+
+                // Hide loading screen
+                setTimeout(() => {
+                    document.getElementById('loadingScreen').classList.add('hidden');
+                }, 1000);
+            }, 500);
+        });
+
+        function initAudio() {
+            try {
+                audioContext = new (window.AudioContext || window.webkitAudioContext)();
+            } catch (e) {
+                console.log('Audio context not supported');
             }
-            
-            // Update content based on current step
-            function updateContent() {
-                // Remove active class from all steps
-                steps.forEach(step => step.classList.remove('active'));
-                
-                // Add active class to current step
-                document.querySelector(`.step[data-step="${currentStep}"]`).classList.add('active');
-                
-                // Reset all animations
-                pcCase.classList.remove('pulse');
-                keyboard.classList.remove('pulse');
-                mouse.classList.remove('pulse');
-                monitor.classList.remove('pulse');
-                cables.forEach(cable => cable.classList.remove('highlight-animation'));
-                
-                // Update instructions and animations based on current step
-                switch(currentStep) {
-                    case 1:
-                        instructions.innerHTML = `
-                            <h2>Langkah 1: Pasang Keyboard & Mouse ke PC</h2>
-                            <p>Cari port <span class="highlight">USB-A</span> di casing PC. Biasanya berbentuk persegi panjang dengan ukuran sekitar 1,5 cm.</p>
-                            <p>Letaknya bisa di bagian belakang casing (dekat port lain seperti HDMI/VGA/LAN), atau di depan/atas casing (jika casing punya port front panel).</p>
-                            <p>Ambil kabel keyboard dan mouse. Ujung kabel biasanya sudah menggunakan USB-A.</p>
-                            <p>Masukkan kabel keyboard ke salah satu port USB. Masukkan kabel mouse ke port USB lain.</p>
-                            <p>Pastikan keduanya masuk dengan posisi yang benar (jangan dipaksa terbalik).</p>
-                        `;
-                        keyboard.classList.add('pulse');
-                        mouse.classList.add('pulse');
-                        document.querySelector('.cable-usb-keyboard').classList.add('highlight-animation');
-                        document.querySelector('.cable-usb-mouse').classList.add('highlight-animation');
-                        break;
-                    case 2:
-                        instructions.innerHTML = `
-                            <h2>Langkah 2: Sambungkan Kabel Power</h2>
-                            <p>Cari kabel power (biasanya kabel dengan 3 lubang di ujungnya, model kabel C13/C14 standar komputer).</p>
-                            <p>Colokkan ujung kabel power yang berbentuk kotak kecil ke port power supply di bagian belakang casing PC.</p>
-                            <p>Port ini biasanya terletak di bawah atau atas casing, tergantung modelnya.</p>
-                            <p>Colokkan ujung kabel satunya lagi (colokan listrik) ke stop kontak atau terminal listrik.</p>
-                            <p>Pastikan tombol switch power supply (jika ada, biasanya berbentuk kecil warna hitam/merah di belakang PSU) dalam posisi ON (—), bukan OFF (O).</p>
-                        `;
-                        pcCase.classList.add('pulse');
-                        document.querySelector('.cable-power').classList.add('highlight-animation');
-                        break;
-                    case 3:
-                        instructions.innerHTML = `
-                            <h2>Langkah 3: Sambungkan Kabel VGA ke Monitor</h2>
-                            <p>Cari port VGA di motherboard PC. Bentuknya seperti trapezium dengan 15 pin kecil (biasanya warna biru).</p>
-                            <p>Terletak di bagian belakang PC, berjejer dengan port lain.</p>
-                            <p>Ambil kabel VGA. Ujung kabel VGA biasanya berwarna biru dengan dua sekrup kecil di kanan dan kiri.</p>
-                            <p>Colokkan salah satu ujung kabel VGA ke port VGA di motherboard PC. Setelah masuk, putar sekrup kecil di kiri dan kanan agar konektor VGA tidak longgar.</p>
-                            <p>Colokkan ujung kabel VGA satunya lagi ke port VGA di monitor. Pastikan juga dikencangkan dengan sekrupnya.</p>
-                            <p>Jika monitor butuh listrik terpisah, sambungkan kabel power monitor ke stop kontak. Nyalakan monitor dengan menekan tombol power di bawah/samping monitor.</p>
-                        `;
-                        monitor.classList.add('pulse');
-                        document.querySelector('.cable-vga').classList.add('highlight-animation');
-                        break;
+        }
+
+        function playSound(frequency = 440, duration = 200, volume = 0.1) {
+            if (!sfxEnabled || !audioContext) return;
+
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+
+            oscillator.frequency.value = frequency;
+            oscillator.type = 'sine';
+
+            gainNode.gain.setValueAtTime(volume, audioContext.currentTime);
+            gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + duration / 1000);
+
+            oscillator.start(audioContext.currentTime);
+            oscillator.stop(audioContext.currentTime + duration / 1000);
+        }
+
+        function initScene() {
+            // Scene setup
+            scene = new THREE.Scene();
+            scene.fog = new THREE.Fog(0x000011, 10, 50);
+
+            // Camera setup
+            camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+            camera.position.set(5, 5, 10);
+
+            // Renderer setup
+            renderer = new THREE.WebGLRenderer({
+                antialias: true,
+                alpha: true,
+                powerPreference: "high-performance"
+            });
+            renderer.setSize(window.innerWidth, window.innerHeight);
+            renderer.setClearColor(0x000011, 0.8);
+            renderer.shadowMap.enabled = true;
+            renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.2;
+
+            document.getElementById('sceneContainer').appendChild(renderer.domElement);
+
+            // Advanced lighting setup
+            const ambientLight = new THREE.AmbientLight(0x404040, 0.3);
+            scene.add(ambientLight);
+
+            const directionalLight = new THREE.DirectionalLight(0xffffff, 1);
+            directionalLight.position.set(5, 10, 5);
+            directionalLight.castShadow = true;
+            directionalLight.shadow.mapSize.width = 2048;
+            directionalLight.shadow.mapSize.height = 2048;
+            scene.add(directionalLight);
+
+            // Neon lighting
+            const neonLight1 = new THREE.PointLight(0x00ffff, 1, 20);
+            neonLight1.position.set(-5, 3, 0);
+            scene.add(neonLight1);
+
+            const neonLight2 = new THREE.PointLight(0xff6b6b, 0.8, 15);
+            neonLight2.position.set(5, 2, -3);
+            scene.add(neonLight2);
+
+            // Rim lighting
+            const rimLight = new THREE.DirectionalLight(0x00ffff, 0.5);
+            rimLight.position.set(-10, 5, -10);
+            scene.add(rimLight);
+
+            // Create 3D models
+            createPCCase();
+            createKeyboard();
+            createMouse();
+            createMonitor();
+            createCables();
+            createEnvironment();
+
+            // Controls
+            initControls();
+        }
+
+        function createPCCase() {
+            const group = new THREE.Group();
+
+            // Main case
+            const caseGeometry = new THREE.BoxGeometry(2, 3, 1.5);
+            const caseMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x2a2a2a,
+                metalness: 0.8,
+                roughness: 0.2,
+                clearcoat: 0.3,
+                reflectivity: 0.9
+            });
+            const caseMain = new THREE.Mesh(caseGeometry, caseMaterial);
+            caseMain.castShadow = true;
+            caseMain.receiveShadow = true;
+            group.add(caseMain);
+
+            // Side panel with tempered glass effect
+            const glassGeometry = new THREE.PlaneGeometry(2.8, 1.4);
+            const glassMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x88ccff,
+                transparent: true,
+                opacity: 0.3,
+                transmission: 0.9,
+                thickness: 0.1,
+                ior: 1.5,
+                clearcoat: 1.0
+            });
+            const glassPanel = new THREE.Mesh(glassGeometry, glassMaterial);
+            glassPanel.position.set(-1.1, 0, 0);
+            glassPanel.rotation.y = Math.PI / 2;
+            group.add(glassPanel);
+
+            // USB ports with glow effect
+            for (let i = 0; i < 4; i++) {
+                const portGeometry = new THREE.BoxGeometry(0.1, 0.03, 0.08);
+                const portMaterial = new THREE.MeshStandardMaterial({
+                    color: 0x000000,
+                    emissive: 0x0033ff,
+                    emissiveIntensity: 0.2
+                });
+                const port = new THREE.Mesh(portGeometry, portMaterial);
+                port.position.set(1.1, -0.5 + (i * 0.15), 0.3);
+                port.userData = { type: 'usb-port', id: i };
+                group.add(port);
+            }
+
+            // Power port
+            const powerGeometry = new THREE.CylinderGeometry(0.06, 0.06, 0.1);
+            const powerMaterial = new THREE.MeshStandardMaterial({
+                color: 0xff4444,
+                emissive: 0xff0000,
+                emissiveIntensity: 0.3
+            });
+            const powerPort = new THREE.Mesh(powerGeometry, powerMaterial);
+            powerPort.rotation.z = Math.PI / 2;
+            powerPort.position.set(1.1, -1, -0.5);
+            powerPort.userData = { type: 'power-port' };
+            group.add(powerPort);
+
+            // VGA port
+            const vgaGeometry = new THREE.BoxGeometry(0.1, 0.06, 0.12);
+            const vgaMaterial = new THREE.MeshStandardMaterial({
+                color: 0x4444ff,
+                emissive: 0x0000ff,
+                emissiveIntensity: 0.2
+            });
+            const vgaPort = new THREE.Mesh(vgaGeometry, vgaMaterial);
+            vgaPort.position.set(1.1, 0.5, -0.3);
+            vgaPort.userData = { type: 'vga-port' };
+            group.add(vgaPort);
+
+            // RGB lighting inside case
+            const rgbGeometry = new THREE.BoxGeometry(1.8, 0.1, 1.3);
+            const rgbMaterial = new THREE.MeshBasicMaterial({
+                color: 0x00ffff,
+                transparent: true,
+                opacity: 0.4
+            });
+            const rgbLight = new THREE.Mesh(rgbGeometry, rgbMaterial);
+            rgbLight.position.y = -1.4;
+            group.add(rgbLight);
+
+            // Animate RGB
+            let rgbHue = 0;
+            const animateRGB = () => {
+                rgbHue += 0.01;
+                rgbMaterial.color.setHSL(rgbHue % 1, 1, 0.5);
+                requestAnimationFrame(animateRGB);
+            };
+            animateRGB();
+
+            group.position.set(0, 0, 0);
+            group.userData = { type: 'pc-case' };
+            scene.add(group);
+            pcCase = group;
+        }
+
+        function createKeyboard() {
+            const group = new THREE.Group();
+
+            // Main keyboard body
+            const keyboardGeometry = new THREE.BoxGeometry(2.5, 0.2, 1);
+            const keyboardMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x1a1a1a,
+                metalness: 0.7,
+                roughness: 0.3,
+                clearcoat: 0.2
+            });
+            const keyboardMain = new THREE.Mesh(keyboardGeometry, keyboardMaterial);
+            keyboardMain.castShadow = true;
+            keyboardMain.receiveShadow = true;
+            group.add(keyboardMain);
+
+            // Individual keys
+            for (let row = 0; row < 4; row++) {
+                for (let col = 0; col < 12; col++) {
+                    const keyGeometry = new THREE.BoxGeometry(0.15, 0.05, 0.15);
+                    const keyMaterial = new THREE.MeshStandardMaterial({
+                        color: 0x333333,
+                        emissive: 0x001133,
+                        emissiveIntensity: 0.1
+                    });
+                    const key = new THREE.Mesh(keyGeometry, keyMaterial);
+                    key.position.set(
+                        -1.1 + (col * 0.2),
+                        0.15,
+                        -0.3 + (row * 0.2)
+                    );
+                    group.add(key);
                 }
-                
-                // Update button states
-                prevBtn.disabled = currentStep === 1;
-                nextBtn.disabled = currentStep === totalSteps;
-                
+            }
+
+            // USB cable
+            const cableGeometry = new THREE.CylinderGeometry(0.02, 0.02, 3);
+            const cableMaterial = new THREE.MeshStandardMaterial({
+                color: 0x444444
+            });
+            const cable = new THREE.Mesh(cableGeometry, cableMaterial);
+            cable.position.set(1, -1, 0);
+            cable.rotation.z = -Math.PI / 6;
+            group.add(cable);
+
+            group.position.copy(componentStates.keyboard.position);
+            group.userData = { type: 'keyboard', interactive: true };
+            scene.add(group);
+            keyboard = group;
+        }
+
+        function createMouse() {
+            const group = new THREE.Group();
+
+            // Mouse body
+            const mouseGeometry = new THREE.BoxGeometry(0.8, 0.3, 1.2);
+            const mouseMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x2a2a2a,
+                metalness: 0.6,
+                roughness: 0.4,
+                clearcoat: 0.3
+            });
+            const mouseMain = new THREE.Mesh(mouseGeometry, mouseMaterial);
+            mouseMain.castShadow = true;
+            mouseMain.receiveShadow = true;
+            group.add(mouseMain);
+
+            // Mouse wheel
+            const wheelGeometry = new THREE.CylinderGeometry(0.05, 0.05, 0.1);
+            const wheelMaterial = new THREE.MeshStandardMaterial({
+                color: 0x666666
+            });
+            const wheel = new THREE.Mesh(wheelGeometry, wheelMaterial);
+            wheel.position.set(0, 0.2, 0.2);
+            wheel.rotation.x = Math.PI / 2;
+            group.add(wheel);
+
+            // LED light
+            const ledGeometry = new THREE.SphereGeometry(0.05);
+            const ledMaterial = new THREE.MeshBasicMaterial({
+                color: 0xff0000,
+                transparent: true,
+                opacity: 0.8
+            });
+            const led = new THREE.Mesh(ledGeometry, ledMaterial);
+            led.position.set(0, 0.18, -0.3);
+            group.add(led);
+
+            // Animate LED
+            let ledIntensity = 0;
+            const animateLED = () => {
+                ledIntensity += 0.05;
+                ledMaterial.opacity = 0.5 + Math.sin(ledIntensity) * 0.3;
+                requestAnimationFrame(animateLED);
+            };
+            animateLED();
+
+            group.position.copy(componentStates.mouse.position);
+            group.userData = { type: 'mouse', interactive: true };
+            scene.add(group);
+            mouse = group;
+        }
+
+        function createMonitor() {
+            const group = new THREE.Group();
+
+            // Monitor frame
+            const frameGeometry = new THREE.BoxGeometry(4, 2.5, 0.2);
+            const frameMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x1a1a1a,
+                metalness: 0.8,
+                roughness: 0.2
+            });
+            const frame = new THREE.Mesh(frameGeometry, frameMaterial);
+            frame.castShadow = true;
+            frame.receiveShadow = true;
+            group.add(frame);
+
+            // Screen
+            const screenGeometry = new THREE.PlaneGeometry(3.6, 2.1);
+            const screenMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000000,
+                transparent: true,
+                opacity: 0.9
+            });
+            const screen = new THREE.Mesh(screenGeometry, screenMaterial);
+            screen.position.z = 0.11;
+            group.add(screen);
+
+            // Screen content
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 256;
+            const ctx = canvas.getContext('2d');
+
+            // Create gradient background
+            const gradient = ctx.createLinearGradient(0, 0, 512, 256);
+            gradient.addColorStop(0, '#1a2a6c');
+            gradient.addColorStop(0.5, '#b21f1f');
+            gradient.addColorStop(1, '#fdbb2d');
+
+            ctx.fillStyle = gradient;
+            ctx.fillRect(0, 0, 512, 256);
+
+            // Add text
+            ctx.fillStyle = 'white';
+            ctx.font = 'bold 24px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText('PC Assembly 3D', 256, 100);
+            ctx.font = '16px Arial';
+            ctx.fillText('Ultra Keren Edition', 256, 130);
+
+            const screenTexture = new THREE.CanvasTexture(canvas);
+            const contentMaterial = new THREE.MeshBasicMaterial({
+                map: screenTexture,
+                transparent: true,
+                opacity: 0.8
+            });
+            const content = new THREE.Mesh(screenGeometry, contentMaterial);
+            content.position.z = 0.12;
+            group.add(content);
+
+            // Stand
+            const standGeometry = new THREE.CylinderGeometry(0.3, 0.5, 1);
+            const standMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x333333,
+                metalness: 0.7,
+                roughness: 0.3
+            });
+            const stand = new THREE.Mesh(standGeometry, standMaterial);
+            stand.position.set(0, -1.7, 0);
+            group.add(stand);
+
+            // VGA port on monitor
+            const vgaPortGeometry = new THREE.BoxGeometry(0.12, 0.08, 0.1);
+            const vgaPortMaterial = new THREE.MeshStandardMaterial({
+                color: 0x4444ff,
+                emissive: 0x0000ff,
+                emissiveIntensity: 0.2
+            });
+            const vgaPortMonitor = new THREE.Mesh(vgaPortGeometry, vgaPortMaterial);
+            vgaPortMonitor.position.set(1.5, -0.5, -0.15);
+            vgaPortMonitor.userData = { type: 'vga-port-monitor' };
+            group.add(vgaPortMonitor);
+
+            group.position.set(6, 3, 0);
+            group.userData = { type: 'monitor', interactive: true };
+            scene.add(group);
+            monitor = group;
+        }
+
+        function createCables() {
+            // Keyboard cable
+            const keyboardCable = createCable(0x444444, [
+                componentStates.keyboard.position.clone().add(new THREE.Vector3(1, 0, 0)),
+                new THREE.Vector3(-1, -1, 1),
+                new THREE.Vector3(1, 0, 0.3)
+            ]);
+            keyboardCable.userData = { type: 'keyboard-cable' };
+            cables.keyboard = keyboardCable;
+
+            // Mouse cable
+            const mouseCable = createCable(0x444444, [
+                componentStates.mouse.position.clone().add(new THREE.Vector3(0.5, 0, 0)),
+                new THREE.Vector3(-0.5, -1, 1.5),
+                new THREE.Vector3(1, 0, 0.5)
+            ]);
+            mouseCable.userData = { type: 'mouse-cable' };
+            cables.mouse = mouseCable;
+
+            // Power cable
+            const powerCable = createCable(0xff4444, [
+                new THREE.Vector3(-3, -2, 0),
+                new THREE.Vector3(-1, -1, 0),
+                new THREE.Vector3(1, -1, -0.5)
+            ]);
+            powerCable.userData = { type: 'power-cable' };
+            cables.power = powerCable;
+
+            // VGA cable
+            const vgaCable = createCable(0x4444ff, [
+                new THREE.Vector3(1, 0.5, -0.3),
+                new THREE.Vector3(3, 2, 0),
+                new THREE.Vector3(6, 2.5, 0)
+            ]);
+            vgaCable.userData = { type: 'vga-cable' };
+            cables.vga = vgaCable;
+        }
+
+        function createCable(color, points) {
+            const curve = new THREE.CatmullRomCurve3(points);
+            const tubeGeometry = new THREE.TubeGeometry(curve, 50, 0.05, 8, false);
+            const tubeMaterial = new THREE.MeshStandardMaterial({
+                color: color,
+                emissive: color,
+                emissiveIntensity: 0.1
+            });
+            const cable = new THREE.Mesh(tubeGeometry, tubeMaterial);
+            cable.visible = false;
+            scene.add(cable);
+            return cable;
+        }
+
+        function createEnvironment() {
+            // Floor
+            const floorGeometry = new THREE.PlaneGeometry(20, 20);
+            const floorMaterial = new THREE.MeshPhysicalMaterial({
+                color: 0x111111,
+                metalness: 0.0,
+                roughness: 0.8,
+                reflectivity: 0.1
+            });
+            const floor = new THREE.Mesh(floorGeometry, floorMaterial);
+            floor.rotation.x = -Math.PI / 2;
+            floor.position.y = -3;
+            floor.receiveShadow = true;
+            scene.add(floor);
+
+            // Grid
+            const gridHelper = new THREE.GridHelper(20, 20, 0x00ffff, 0x003333);
+            gridHelper.position.y = -2.99;
+            scene.add(gridHelper);
+
+            // Background geometry
+            const bgGeometry = new THREE.SphereGeometry(30);
+            const bgMaterial = new THREE.MeshBasicMaterial({
+                color: 0x000011,
+                transparent: true,
+                opacity: 0.3,
+                side: THREE.BackSide
+            });
+            const bgSphere = new THREE.Mesh(bgGeometry, bgMaterial);
+            scene.add(bgSphere);
+        }
+
+        function initControls() {
+            // Mouse controls for camera
+            let isDragging = false;
+            let previousMousePosition = { x: 0, y: 0 };
+
+            renderer.domElement.addEventListener('mousedown', (e) => {
+                isDragging = true;
+                previousMousePosition = { x: e.clientX, y: e.clientY };
+            });
+
+            renderer.domElement.addEventListener('mousemove', (e) => {
+                mouse3D.x = (e.clientX / window.innerWidth) * 2 - 1;
+                mouse3D.y = -(e.clientY / window.innerHeight) * 2 + 1;
+
+                if (isDragging) {
+                    const deltaX = e.clientX - previousMousePosition.x;
+                    const deltaY = e.clientY - previousMousePosition.y;
+
+                    // Rotate camera around scene
+                    const spherical = new THREE.Spherical();
+                    spherical.setFromVector3(camera.position);
+                    spherical.theta -= deltaX * 0.01;
+                    spherical.phi += deltaY * 0.01;
+                    spherical.phi = Math.max(0.1, Math.min(Math.PI - 0.1, spherical.phi));
+
+                    camera.position.setFromSpherical(spherical);
+                    camera.lookAt(0, 0, 0);
+
+                    previousMousePosition = { x: e.clientX, y: e.clientY };
+                }
+
+                // Raycast for hover effects
+                raycaster.setFromCamera(mouse3D, camera);
+                const intersects = raycaster.intersectObjects(scene.children, true);
+
+                if (intersects.length > 0) {
+                    const object = intersects[0].object;
+                    if (object.userData.interactive) {
+                        if (hoveredObject !== object) {
+                            if (hoveredObject) {
+                                resetObjectHover(hoveredObject);
+                            }
+                            hoveredObject = object;
+                            highlightObject(object);
+                            showFloatingUI(e.clientX, e.clientY, object.userData.type);
+                        }
+                    } else {
+                        if (hoveredObject) {
+                            resetObjectHover(hoveredObject);
+                            hoveredObject = null;
+                            hideFloatingUI();
+                        }
+                    }
+                } else {
+                    if (hoveredObject) {
+                        resetObjectHover(hoveredObject);
+                        hoveredObject = null;
+                        hideFloatingUI();
+                    }
+                }
+            });
+
+            renderer.domElement.addEventListener('mouseup', () => {
+                isDragging = false;
+            });
+
+            renderer.domElement.addEventListener('wheel', (e) => {
+                const zoomFactor = e.deltaY > 0 ? 1.1 : 0.9;
+                camera.position.multiplyScalar(zoomFactor);
+                camera.position.clampLength(3, 20);
+            });
+
+            renderer.domElement.addEventListener('click', (e) => {
+                if (hoveredObject && hoveredObject.userData.interactive) {
+                    handleObjectClick(hoveredObject);
+                    playSound(660, 150, 0.2);
+                }
+            });
+        }
+
+        function highlightObject(object) {
+            if (object.material) {
+                object.material.emissiveIntensity = 0.3;
+                object.material.emissive.setHex(0x00ffff);
+            }
+            object.parent.children.forEach(child => {
+                if (child.material) {
+                    child.material.emissiveIntensity = 0.2;
+                    child.material.emissive.setHex(0x004444);
+                }
+            });
+        }
+
+        function resetObjectHover(object) {
+            if (object.material) {
+                object.material.emissiveIntensity = 0.1;
+                object.material.emissive.setHex(0x000000);
+            }
+            object.parent.children.forEach(child => {
+                if (child.material) {
+                    child.material.emissiveIntensity = 0.1;
+                    child.material.emissive.setHex(0x000000);
+                }
+            });
+        }
+
+        function handleObjectClick(object) {
+            const type = object.userData.type;
+
+            if (currentStep === 2 && (type === 'keyboard' || type === 'mouse')) {
+                connectPeripheral(type);
+            } else if (currentStep === 3 && type === 'power-port') {
+                connectPower();
+            } else if (currentStep === 4 && (type === 'vga-port' || type === 'monitor')) {
+                connectVGA();
+            }
+        }
+
+        function connectPeripheral(type) {
+            const peripheral = type === 'keyboard' ? keyboard : mouse;
+            const targetPosition = new THREE.Vector3(
+                type === 'keyboard' ? -2 : -1,
+                -2,
+                type === 'keyboard' ? 1 : 2
+            );
+
+            // Animate movement
+            new TWEEN.Tween(peripheral.position)
+                .to(targetPosition, 2000)
+                .easing(TWEEN.Easing.Cubic.InOut)
+                .onUpdate(() => {
+                    // Update cable visibility
+                    cables[type].visible = true;
+                })
+                .onComplete(() => {
+                    componentStates[type].connected = true;
+                    checkStepCompletion();
+                    showConnectionLine(peripheral.position, new THREE.Vector3(1, 0, 0.3));
+                })
+                .start();
+
+            playSound(440, 300, 0.15);
+        }
+
+        function connectPower() {
+            cables.power.visible = true;
+            componentStates.power.connected = true;
+            checkStepCompletion();
+            showConnectionLine(new THREE.Vector3(-3, -2, 0), new THREE.Vector3(1, -1, -0.5));
+            playSound(220, 500, 0.2);
+        }
+
+        function connectVGA() {
+            cables.vga.visible = true;
+            componentStates.vga.connected = true;
+            checkStepCompletion();
+            showConnectionLine(new THREE.Vector3(1, 0.5, -0.3), new THREE.Vector3(6, 2.5, 0));
+            playSound(660, 400, 0.18);
+        }
+
+        function showConnectionLine(start, end) {
+            const geometry = new THREE.BufferGeometry().setFromPoints([start, end]);
+            const material = new THREE.LineBasicMaterial({
+                color: 0x00ffff,
+                linewidth: 3,
+                transparent: true,
+                opacity: 0.8
+            });
+            const line = new THREE.Line(geometry, material);
+            scene.add(line);
+
+            // Animate line
+            let progress = 0;
+            const animateLine = () => {
+                progress += 0.05;
+                material.opacity = 0.8 * Math.sin(progress);
+                if (progress < Math.PI * 4) {
+                    requestAnimationFrame(animateLine);
+                } else {
+                    scene.remove(line);
+                }
+            };
+            animateLine();
+        }
+
+        function checkStepCompletion() {
+            let completed = false;
+
+            switch (currentStep) {
+                case 2:
+                    completed = componentStates.keyboard.connected && componentStates.mouse.connected;
+                    break;
+                case 3:
+                    completed = componentStates.power.connected;
+                    break;
+                case 4:
+                    completed = componentStates.vga.connected;
+                    break;
+            }
+
+            if (completed) {
+                setTimeout(() => {
+                    showSuccessPopup();
+                    nextStep();
+                }, 1000);
+            }
+        }
+
+        function showSuccessPopup() {
+            const popup = document.getElementById('successPopup');
+            popup.classList.add('show');
+            playSound(880, 200, 0.3);
+
+            setTimeout(() => {
+                popup.classList.remove('show');
+            }, 2000);
+        }
+
+        function nextStep() {
+            if (currentStep < totalSteps) {
+                // Mark current step as completed
+                document.querySelector(`.step-item[data-step="${currentStep}"]`).classList.add('completed');
+                document.querySelector(`.step-item[data-step="${currentStep}"]`).classList.remove('active');
+
+                currentStep++;
+
+                // Activate next step
+                if (currentStep <= totalSteps) {
+                    document.querySelector(`.step-item[data-step="${currentStep}"]`).classList.add('active');
+                    updateInstructions();
+                    updateProgress();
+                }
+            }
+        }
+
+        function updateInstructions() {
+            const panel = document.getElementById('instructionPanel');
+            const instructions = {
+                1: {
+                    title: 'Langkah 1: Persiapan Workspace',
+                    content: [
+                        'Selamat datang di tutorial 3D ultra keren! 🚀',
+                        'Klik dan drag untuk <span class="highlight">memutar kamera 3D</span>',
+                        'Scroll mouse untuk <span class="highlight">zoom in/out</span>',
+                        'Klik pada komponen untuk <span class="highlight">interaksi</span>'
+                    ]
+                },
+                2: {
+                    title: 'Langkah 2: Pasang Keyboard & Mouse',
+                    content: [
+                        'Klik pada <span class="highlight">keyboard</span> untuk menghubungkannya ke PC',
+                        'Klik pada <span class="highlight">mouse</span> untuk menghubungkannya ke PC',
+                        'Perhatikan animasi kabel USB yang terhubung secara otomatis',
+                        'Kedua perangkat harus terhubung untuk melanjutkan'
+                    ]
+                },
+                3: {
+                    title: 'Langkah 3: Hubungkan Kabel Power',
+                    content: [
+                        'Klik pada <span class="highlight">port power</span> di bagian belakang PC',
+                        'Kabel power akan terhubung secara otomatis',
+                        'Perhatikan efek visual saat kabel power tersambung',
+                        'Pastikan connection line muncul menandakan koneksi berhasil'
+                    ]
+                },
+                4: {
+                    title: 'Langkah 4: Sambungkan Monitor VGA',
+                    content: [
+                        'Klik pada <span class="highlight">port VGA biru</span> di PC atau monitor',
+                        'Kabel VGA akan menghubungkan PC dengan monitor',
+                        'Monitor akan menampilkan sinyal saat berhasil terhubung',
+                        'Perhatikan efek cahaya yang menandakan koneksi aktif'
+                    ]
+                },
+                5: {
+                    title: 'Langkah 5: Selesai! 🎉',
+                    content: [
+                        '<span class="highlight">Selamat!</span> Semua komponen telah terhubung',
+                        'PC Anda siap untuk digunakan',
+                        'Semua kabel telah tersambung dengan benar',
+                        'Klik "Restart Tutorial" untuk mengulang dari awal'
+                    ]
+                }
+            };
+
+            const current = instructions[currentStep];
+            panel.innerHTML = `
+                <h3>${current.title}</h3>
+                ${current.content.map(text => `<p>${text}</p>`).join('')}
+            `;
+        }
+
+        function updateProgress() {
+            const progress = ((currentStep - 1) / (totalSteps - 1)) * 100;
+            document.getElementById('progressFill').style.width = progress + '%';
+
+            const stepNames = ['Persiapan', 'Keyboard & Mouse', 'Kabel Power', 'Monitor VGA', 'Selesai'];
+            document.getElementById('progressText').textContent =
+                `Langkah ${currentStep} dari ${totalSteps} - ${stepNames[currentStep - 1]}`;
+        }
+
+        function showFloatingUI(x, y, type) {
+            const ui = document.getElementById('floatingUI');
+            const content = document.getElementById('floatingContent');
+
+            const descriptions = {
+                'keyboard': '⌨️ Keyboard - Klik untuk menghubungkan via USB',
+                'mouse': '🖱️ Mouse - Klik untuk menghubungkan via USB',
+                'pc-case': '🖥️ PC Case - Tempat semua komponen terhubung',
+                'monitor': '🖥️ Monitor - Klik untuk menghubungkan kabel VGA',
+                'power-port': '🔌 Power Port - Klik untuk menghubungkan listrik',
+                'vga-port': '📺 VGA Port - Klik untuk menghubungkan ke monitor'
+            };
+
+            content.textContent = descriptions[type] || 'Komponen PC';
+            ui.style.left = x + 20 + 'px';
+            ui.style.top = y - 20 + 'px';
+            ui.classList.add('show');
+        }
+
+        function hideFloatingUI() {
+            document.getElementById('floatingUI').classList.remove('show');
+        }
+
+        function initEventListeners() {
+            // Control buttons
+            document.getElementById('resetCamera').addEventListener('click', () => {
+                new TWEEN.Tween(camera.position)
+                    .to(new THREE.Vector3(5, 5, 10), 1000)
+                    .easing(TWEEN.Easing.Cubic.InOut)
+                    .onUpdate(() => camera.lookAt(0, 0, 0))
+                    .start();
+                playSound(440, 200);
+            });
+
+            document.getElementById('autoRotate').addEventListener('click', (e) => {
+                isAutoRotating = !isAutoRotating;
+                e.target.textContent = isAutoRotating ? '⏸️ Stop Rotate' : '🔄 Auto Rotate';
+                playSound(550, 150);
+            });
+
+            document.getElementById('toggleWireframe').addEventListener('click', (e) => {
+                isWireframe = !isWireframe;
+                scene.traverse((child) => {
+                    if (child.material) {
+                        child.material.wireframe = isWireframe;
+                    }
+                });
+                e.target.textContent = isWireframe ? '🎨 Solid Mode' : '📐 Wireframe Mode';
+                playSound(330, 200);
+            });
+
+            document.getElementById('completeStep').addEventListener('click', () => {
+                nextStep();
+                playSound(660, 300);
+            });
+
+            document.getElementById('skipStep').addEventListener('click', () => {
+                nextStep();
+                playSound(220, 200);
+            });
+
+            document.getElementById('restartTutorial').addEventListener('click', () => {
+                currentStep = 1;
+                componentStates = {
+                    keyboard: { connected: false, position: new THREE.Vector3(-3, 0, 2) },
+                    mouse: { connected: false, position: new THREE.Vector3(-2, 0, 3) },
+                    power: { connected: false },
+                    vga: { connected: false }
+                };
+
+                // Reset visual states
+                Object.values(cables).forEach(cable => cable.visible = false);
+                keyboard.position.copy(componentStates.keyboard.position);
+                mouse.position.copy(componentStates.mouse.position);
+
+                // Reset UI
+                document.querySelectorAll('.step-item').forEach(item => {
+                    item.classList.remove('active', 'completed');
+                });
+                document.querySelector('.step-item[data-step="1"]').classList.add('active');
+
+                updateInstructions();
                 updateProgress();
-            }
-            
-            // Next button click event
-            nextBtn.addEventListener('click', function() {
-                if (currentStep < totalSteps) {
-                    currentStep++;
-                    updateContent();
-                }
+                playSound(880, 400);
             });
-            
-            // Previous button click event
-            prevBtn.addEventListener('click', function() {
-                if (currentStep > 1) {
-                    currentStep--;
-                    updateContent();
-                }
+
+            // Audio controls
+            document.getElementById('musicBtn').addEventListener('click', (e) => {
+                musicEnabled = !musicEnabled;
+                e.target.style.opacity = musicEnabled ? '1' : '0.5';
+                playSound(440, 100);
             });
-            
-            // Step click event
-            steps.forEach(step => {
-                step.addEventListener('click', function() {
-                    currentStep = parseInt(this.getAttribute('data-step'));
-                    updateContent();
+
+            document.getElementById('sfxBtn').addEventListener('click', (e) => {
+                sfxEnabled = !sfxEnabled;
+                e.target.style.opacity = sfxEnabled ? '1' : '0.5';
+                if (sfxEnabled) playSound(660, 100);
+            });
+
+            // Step clicks
+            document.querySelectorAll('.step-item').forEach(item => {
+                item.addEventListener('click', () => {
+                    const step = parseInt(item.dataset.step);
+                    if (step <= currentStep + 1) { // Allow clicking next step only
+                        currentStep = step;
+                        document.querySelectorAll('.step-item').forEach(s => {
+                            s.classList.remove('active');
+                            if (parseInt(s.dataset.step) < currentStep) {
+                                s.classList.add('completed');
+                            } else {
+                                s.classList.remove('completed');
+                            }
+                        });
+                        item.classList.add('active');
+                        updateInstructions();
+                        updateProgress();
+                        playSound(550, 200);
+                    }
                 });
             });
-            
-            // Initialize content
-            updateContent();
-        });
+
+            // Window resize
+            window.addEventListener('resize', () => {
+                camera.aspect = window.innerWidth / window.innerHeight;
+                camera.updateProjectionMatrix();
+                renderer.setSize(window.innerWidth, window.innerHeight);
+            });
+        }
+
+        function initParticles() {
+            const container = document.getElementById('particleContainer');
+
+            setInterval(() => {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.style.left = Math.random() * window.innerWidth + 'px';
+                particle.style.animationDelay = Math.random() * 2 + 's';
+                particle.style.animationDuration = (4 + Math.random() * 4) + 's';
+
+                // Random colors
+                const colors = ['#00ffff', '#ff6b6b', '#ffd93d', '#4ade80'];
+                particle.style.background = colors[Math.floor(Math.random() * colors.length)];
+                particle.style.boxShadow = `0 0 10px ${particle.style.background}`;
+
+                container.appendChild(particle);
+
+                setTimeout(() => {
+                    if (particle.parentNode) {
+                        particle.parentNode.removeChild(particle);
+                    }
+                }, 8000);
+            }, 500);
+        }
+
+        function initCustomCursor() {
+            const cursor = document.querySelector('.custom-cursor');
+
+            document.addEventListener('mousemove', (e) => {
+                cursor.style.left = e.clientX - 10 + 'px';
+                cursor.style.top = e.clientY - 10 + 'px';
+            });
+
+            document.addEventListener('mousedown', () => {
+                cursor.classList.add('active');
+            });
+
+            document.addEventListener('mouseup', () => {
+                cursor.classList.remove('active');
+            });
+        }
+
+        function updateFPSCounter() {
+            frameCount++;
+            const now = performance.now();
+
+            if (now - lastTime >= 1000) {
+                const fps = Math.round((frameCount * 1000) / (now - lastTime));
+                document.getElementById('fpsCounter').textContent = `FPS: ${fps}`;
+                frameCount = 0;
+                lastTime = now;
+            }
+        }
+
+        function animate() {
+            requestAnimationFrame(animate);
+
+            updateFPSCounter();
+            TWEEN.update();
+
+            // Auto rotate camera
+            if (isAutoRotating) {
+                const time = Date.now() * 0.0005;
+                camera.position.x = Math.cos(time) * 12;
+                camera.position.z = Math.sin(time) * 12;
+                camera.lookAt(0, 0, 0);
+            }
+
+            // Rotate PC case slightly
+            if (pcCase) {
+                pcCase.rotation.y += 0.002;
+            }
+
+            // Update materials with time-based effects
+            const time = Date.now() * 0.001;
+            scene.traverse((child) => {
+                if (child.material && child.material.emissive) {
+                    // Pulse effect for interactive objects
+                    if (child.userData.interactive) {
+                        const intensity = 0.1 + Math.sin(time * 2) * 0.05;
+                        child.material.emissiveIntensity = intensity;
+                    }
+                }
+            });
+
+            renderer.render(scene, camera);
+        }
+
+        // Initialize everything
+        updateInstructions();
+        updateProgress();
     </script>
 </body>
 </html>
